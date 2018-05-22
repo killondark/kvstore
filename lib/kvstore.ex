@@ -1,4 +1,3 @@
-# Это точка входа в приложение.
 defmodule KVstore do
   use Application
   require Logger
