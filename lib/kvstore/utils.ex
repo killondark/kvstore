@@ -9,9 +9,7 @@ defmodule KVstore.Utils do
   def remove(key, ttl) do
     {ttl,  _} = Integer.parse(ttl)
     :timer.sleep(:timer.seconds(ttl))
-    open_table()
     :dets.delete(:kvstore, key)
-    close_table()
     Logger.info("Removed #{key} after #{ttl} seconds")
   end
 
@@ -24,14 +22,11 @@ defmodule KVstore.Utils do
   end
 
   def check_ttl_in_dets do
-    open_table()
     keys_ttl_pair = :dets.match(:kvstore, {:"$1", :"_", :"$2"})
     Enum.each(keys_ttl_pair, fn([key, ttl]) -> run_async_task(key, ttl) end)
-    close_table()
   end
 
   def run_async_task(key, ttl) do
     Task.async(__MODULE__, :remove, [key, ttl])
   end
-
 end

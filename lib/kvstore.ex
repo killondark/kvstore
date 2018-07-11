@@ -7,6 +7,7 @@ defmodule KVstore do
     children = [
       Plug.Adapters.Cowboy.child_spec(:http, KVstore.Router, [], port: port)
     ]
+    KVstore.Utils.open_table()
     Logger.info("Started application")
     Task.async(KVstore.Utils, :check_ttl_in_dets, [])
     Supervisor.start_link(children, strategy: :one_for_one)
