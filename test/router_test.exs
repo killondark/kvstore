@@ -36,6 +36,44 @@ defmodule KVstore.RouterTest do
     assert conn.status == 200
   end
 
+  test "go to index action" do
+    conn =
+      conn(:get, "/index", "")
+      |> put_resp_header("content-type", "text/html; charset=utf-8")
+      |> Router.call(@opts)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+  end
+
+  test "go to show action" do
+    conn =
+      conn(:get, "/show/key", "")
+      |> put_resp_header("content-type", "text/html; charset=utf-8")
+      |> Router.call(@opts)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+  end
+
+  test "go to update action" do
+    conn =
+      conn(:put, "/update/key", %{"key" => "new_key", "value" => "new_value", "ttl" => "10"})
+      |> Router.call(@opts)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+  end
+
+  test "go to destroy action" do
+    conn =
+      conn(:delete, "/destroy/key", %{"key" => "key", "value" => "value", "ttl" => "10"})
+      |> Router.call(@opts)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+  end
+
   test "go to create action" do
     conn =
       conn(:post, "/create", %{"key" => "test_key", "value" => "test_value", "ttl" => "10"})

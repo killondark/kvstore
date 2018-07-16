@@ -2,17 +2,19 @@ defmodule KVstore.Storage do
   import Plug.Conn
   require Logger
 
+  alias KVstore.Utils
+
   def init(options), do: options
 
   def call(conn, _opts), do: conn
 
   def index(conn) do
-    kvlists = :dets.match(:kvstore, {:"$1", :"$2", :"$3"})
+    kvlists = :dets.match(Utils.kvstore_name(), {:"$1", :"$2", :"$3"})
     send_resp(conn, 200, "Listing kvstore records\n#{Kernel.inspect(kvlists)}")
   end
 
   def show(conn) do
-    kvlist = :dets.match_object(:kvstore, {conn.params["key"], :"$2", :"$3"})
+    kvlist = :dets.match_object(Utils.kvstore_name(), {conn.params["key"], :"$2", :"$3"})
     send_resp(conn, 200, "Show kvstore record\n#{Kernel.inspect(kvlist)}")
   end
 
@@ -29,7 +31,7 @@ defmodule KVstore.Storage do
     case Integer.parse(conn.params["ttl"]) do
       :error -> send_resp(conn, 200, "Invalid ttl value")
       _ ->
-        :dets.insert_new(:kvstore, {conn.params["key"],
+        :dets.insert_new(Utils.kvstore_name(), {conn.params["key"],
                           conn.params["value"],
                           conn.params["ttl"]})
         Logger.info("Create record #{Kernel.inspect(conn.params)}")
@@ -43,17 +45,17 @@ defmodule KVstore.Storage do
     case Integer.parse(conn.params["ttl"]) do
       :error -> send_resp(conn, 200, "Invalid ttl value")
       _ ->
-        :dets.insert_new(:kvstore, {conn.params["key"],
+        :dets.delete(Utils.kvstore_name(), conn.params["old_key"])
+        :dets.insert_new(Utils.kvstore_name(), {conn.params["key"],
                           conn.params["value"],
                           conn.params["ttl"]})
-        :dets.delete(:kvstore, conn.params["old_key"])
         KVstore.Utils.run_async_task(conn.params["key"], conn.params["ttl"])
         send_resp(conn, 200, "Updated in DETS")
     end
   end
 
   def destroy(conn) do
-    :dets.delete(:kvstore, conn.params["key"])
+    :dets.delete(Utils.kvstore_name(), conn.params["key"])
     send_resp(conn, 200, "Removed record with #{conn.params["key"]}")
   end
 

@@ -3,7 +3,7 @@ defmodule KVstore do
   require Logger
 
   def start(_type, _args) do
-    port = Application.get_env(:kvstore, :cowboy_port, 8080)
+    port = Application.get_env(KVstore.Utils.kvstore_name(), :cowboy_port, 8080)
     children = [
       Plug.Adapters.Cowboy.child_spec(:http, KVstore.Router, [], port: port)
     ]
