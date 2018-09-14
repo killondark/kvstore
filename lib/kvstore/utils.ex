@@ -10,10 +10,9 @@ defmodule KVstore.Utils do
   end
 
   def validate(conn) do
-    conn =
-      conn
-      |> put_req_header("content-type", "application/x-www-form-urlencoded")
-      |> parse()
+    conn
+    |> put_req_header("content-type", "application/x-www-form-urlencoded")
+    |> parse()
   end
 
   def remove(key, ttl) do
@@ -24,7 +23,7 @@ defmodule KVstore.Utils do
   end
 
   def check_ttl_in_dets do
-    keys_ttl_pair = Storage.match_params(Storage.kvstore_name(), {:"$1", :"_", :"$2"})
+    keys_ttl_pair = Storage.match_params(Storage.kvstore_name(), {:"$1", :_, :"$2"})
     Enum.each(keys_ttl_pair, fn([key, ttl]) -> run_async_task(key, ttl) end)
   end
 

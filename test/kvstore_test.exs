@@ -1,2 +1,0 @@
-defmodule KVstoreTest do
-end
